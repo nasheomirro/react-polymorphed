@@ -1,6 +1,8 @@
 import resolve from "@rollup/plugin-node-resolve";
 import commonjs from "@rollup/plugin-commonjs";
 import typescript from "@rollup/plugin-typescript";
+import terser from "@rollup/plugin-terser";
+import peerDepsExternal from "rollup-plugin-peer-deps-external";
 import dts from "rollup-plugin-dts";
 
 import packageJson from "./package.json" assert { type: "json" };
@@ -8,6 +10,7 @@ import packageJson from "./package.json" assert { type: "json" };
 export default [
   {
     input: "src/index.ts",
+    external: ['react-dom'], // idk, sb needs it but i don't need it to be a peer dep so..
     output: [
       {
         file: packageJson.main,
@@ -21,9 +24,11 @@ export default [
       },
     ],
     plugins: [
+      peerDepsExternal(),
       resolve(),
       commonjs(),
       typescript({ tsconfig: "./tsconfig.json" }),
+      terser(),
     ],
   },
   {
