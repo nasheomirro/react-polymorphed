@@ -10,7 +10,7 @@ import packageJson from "./package.json" assert { type: "json" };
 export default [
   {
     input: "src/index.ts",
-    external: ['react-dom'], // idk, sb needs it but i don't need it to be a peer dep so..
+    external: ['react-dom'],
     output: [
       {
         file: packageJson.main,
