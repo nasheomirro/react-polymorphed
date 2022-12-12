@@ -1,1 +1,2 @@
-console.log("hi");
+export * from "./utils";
+export * from "./types";
