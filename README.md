@@ -1,7 +1,7 @@
-A simple template for creating react libraries/packages.
+# react-assert-polymorph
 
-- has storybook 6.5
-- rollup configured for esm and cjs
-- typescript support
-- test components with jest (transpiled with babel)
-- pretter/eslint
+Provides types and `forwardRef` function to create fast type-safe polymorphic components.
+
+## Important to mention
+
+I stripped this out of Chakra-UI and only slightly modified it.
