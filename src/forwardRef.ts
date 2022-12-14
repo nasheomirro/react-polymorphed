@@ -13,7 +13,7 @@ import { $Merge, PolyForwardExoticComponent, WithAs } from "./types";
 const forwardRef = <
   Default extends ElementType = ElementType,
   P extends object = {},
-  Loose extends string = "loose"
+  Loose extends "loose" | null = null
 >(
   Component: ForwardRefRenderFunction<
     any,

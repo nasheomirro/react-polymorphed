@@ -1,27 +1,16 @@
 import {
-  Component,
   ComponentProps,
   ComponentPropsWithoutRef,
-  ComponentPropsWithRef,
   ElementType,
   ForwardRefExoticComponent,
   LazyExoticComponent,
   MemoExoticComponent,
   NamedExoticComponent,
-  PropsWithoutRef,
   PropsWithRef,
   ReactElement,
-  RefAttributes,
 } from "react";
 
 export type $Merge<A, B> = Omit<A, keyof B> & B;
-
-// https://github.com/Microsoft/TypeScript/issues/27024#issuecomment-421529650
-export type $Equals<X, Y> = (<T>() => T extends X ? 1 : 2) extends <
-  T
->() => T extends Y ? 1 : 2
-  ? true
-  : false;
 
 /** Adds `as` property as an optional prop if Props doesn't already have the `as` property. */
 export type WithAs<
@@ -29,14 +18,9 @@ export type WithAs<
   Type extends ElementType = ElementType
 > = { as?: Type } & Props;
 
-type ComponentPropsWithRef<T extends ElementType> =
-  T extends keyof JSX.IntrinsicElements
-    ? JSX.IntrinsicElements[T]
-    : T extends (props: P) => ReactElement<any, any> | null
-    ? PropsWithRef<ComponentProps<T>>
-    : T extends new (props: infer P) => Component<any, any>
-    ? PropsWithoutRef<P> & RefAttributes<InstanceType<T>>
-    : PropsWithRef<ComponentProps<T>>;
+type PropsButWithRef<T extends ElementType> = PropsWithRef<
+  ComponentProps<T>
+>;
 
 export type PolymorphicPropsWithoutRef<
   Component extends ElementType,
@@ -46,7 +30,7 @@ export type PolymorphicPropsWithoutRef<
 export type PolymorphicPropsWithRef<
   Component extends ElementType = ElementType,
   Props extends object = {}
-> = $Merge<PropsWithRef<ComponentProps<Component>>, WithAs<Props, Component>>;
+> = $Merge<PropsButWithRef<Component>, WithAs<Props, Component>>;
 
 /**
  * makes components polymorphic given the default prop type,
@@ -114,8 +98,8 @@ export type LoosePolymorphicComponentWithRef<
 > = {
   <Component extends ElementType = Default>(
     props: ManualPolymorphicProps<
-      PropsWithRef<ComponentProps<Default>>,
-      PropsWithRef<ComponentProps<Component>>,
+      PropsButWithRef<Default>,
+      PropsButWithRef<Component>,
       Default,
       Component,
       Props

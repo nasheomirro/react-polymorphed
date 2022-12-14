@@ -1,12 +1,13 @@
-import { Component, ComponentProps, ComponentPropsWithoutRef, ElementType, ForwardRefExoticComponent, LazyExoticComponent, MemoExoticComponent, NamedExoticComponent, PropsWithoutRef, PropsWithRef, ReactElement, RefAttributes } from "react";
+import { Component, ComponentPropsWithoutRef, ElementType, ForwardRefExoticComponent, LazyExoticComponent, MemoExoticComponent, NamedExoticComponent, PropsWithoutRef, PropsWithRef, ReactElement, RefAttributes } from "react";
 export type $Merge<A, B> = Omit<A, keyof B> & B;
 /** Adds `as` property as an optional prop if Props doesn't already have the `as` property. */
 export type WithAs<Props extends object = {}, Type extends ElementType = ElementType> = {
     as?: Type;
 } & Props;
-export type _ComponentPropsWithRef<T extends ElementType> = Exclude<ElementType, T> extends never ? PropsWithRef<ComponentProps<T>> : T extends new (props: infer P) => Component<any, any> ? PropsWithoutRef<P> & RefAttributes<InstanceType<T>> : PropsWithRef<ComponentProps<T>>;
+type Screwit<T extends keyof JSX.IntrinsicElements> = PropsWithRef<JSX.IntrinsicElements[T]>;
+type ComponentPropsWithRef<T extends ElementType> = T extends keyof JSX.IntrinsicElements ? Screwit<T> : T extends (props: infer P) => ReactElement<any, any> | null ? PropsWithRef<P> : T extends new (props: infer P) => Component<any, any> ? PropsWithoutRef<P> & RefAttributes<InstanceType<T>> : {};
 export type PolymorphicPropsWithoutRef<Component extends ElementType, Props extends object = {}> = $Merge<ComponentPropsWithoutRef<Component>, WithAs<Props, Component>>;
-export type PolymorphicPropsWithRef<Component extends ElementType = ElementType, Props extends object = {}> = $Merge<_ComponentPropsWithRef<Component>, WithAs<Props, Component>>;
+export type PolymorphicPropsWithRef<Component extends ElementType = ElementType, Props extends object = {}> = $Merge<ComponentPropsWithRef<Component>, WithAs<Props, Component>>;
 /**
  * makes components polymorphic given the default prop type,
  */
@@ -34,9 +35,10 @@ export type LoosePolymorphicComponent<Default extends ElementType = ElementType,
  * have to use this when you can use `forwardRef()`.
  */
 export type LoosePolymorphicComponentWithRef<Default extends ElementType = ElementType, Props extends object = {}> = {
-    <Component extends ElementType = Default>(props: ManualPolymorphicProps<_ComponentPropsWithRef<Default>, _ComponentPropsWithRef<Component>, Default, Component, Props>): ReactElement | null;
+    <Component extends ElementType = Default>(props: ManualPolymorphicProps<ComponentPropsWithRef<Default>, ComponentPropsWithRef<Component>, Default, Component, Props>): ReactElement | null;
 };
 export type PolyForwardExoticComponent<Default extends ElementType, Props extends object = {}> = $Merge<ForwardRefExoticComponent<{}>, PolymorphicComponentWithRef<Default, Props>>;
 export type PolyNamedExoticComponent<Default extends ElementType, Props extends object = {}> = $Merge<NamedExoticComponent<{}>, PolymorphicComponent<Default, Props>>;
 export type PolyMemoExoticComponent<Default extends ElementType, Props extends object = {}> = $Merge<MemoExoticComponent<any>, PolymorphicComponentWithRef<Default, Props>>;
 export type PolyLazyExoticComponent<Default extends ElementType, Props extends object = {}> = $Merge<LazyExoticComponent<any>, PolymorphicComponentWithRef<Default, Props>>;
+export {};
