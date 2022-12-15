@@ -1,10 +1,6 @@
-import React, {
-  ComponentPropsWithoutRef,
-  ElementType,
-  ForwardRefRenderFunction,
-} from "react";
-
-import { Merge, PolyForwardExoticComponent, WithAs } from "./types";
+// Stolen from chakra-ui
+import React, { ElementType, ForwardRefRenderFunction } from "react";
+import { PolyForwardExoticComponent, WithAs } from "../types";
 
 /**
  * React.forwardRef but typed in a way to support Polymorphic Components,
@@ -13,16 +9,8 @@ import { Merge, PolyForwardExoticComponent, WithAs } from "./types";
  */
 function forwardRef<
   Default extends ElementType = ElementType,
-  P extends object = {},
-  Loose extends "loose" | null = null
->(
-  Component: ForwardRefRenderFunction<
-    any,
-    Loose extends "loose"
-      ? Merge<ComponentPropsWithoutRef<Default>, WithAs<P>>
-      : WithAs<P>
-  >
-) {
+  P extends object = {}
+>(Component: ForwardRefRenderFunction<any, WithAs<P>>) {
   return React.forwardRef(Component) as PolyForwardExoticComponent<Default, P>;
 }
 
