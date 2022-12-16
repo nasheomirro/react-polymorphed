@@ -1,11 +1,14 @@
+/* eslint-env node */
 import resolve from "@rollup/plugin-node-resolve";
 import commonjs from "@rollup/plugin-commonjs";
 import typescript from "@rollup/plugin-typescript";
 import terser from "@rollup/plugin-terser";
 import peerDepsExternal from "rollup-plugin-peer-deps-external";
 import dts from "rollup-plugin-dts";
+import path from "path";
 
 import packageJson from "./package.json" assert { type: "json" };
+import alias from "@rollup/plugin-alias";
 
 export default [
   {
@@ -23,6 +26,14 @@ export default [
       },
     ],
     plugins: [
+      alias({
+        entries: [
+          {
+            find: "react-polymorphed",
+            replacement: path.resolve(__dirname, "src/index.ts"),
+          },
+        ],
+      }),
       peerDepsExternal(),
       resolve(),
       commonjs(),

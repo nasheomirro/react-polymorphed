@@ -1,8 +1,8 @@
 # react-polymorphed
 
-create type-safe polymorphic components that doesn't crash typescript, also note this package was based off of [react-polymorphic-types](https://github.com/kripod/react-polymorphic-types).
+create type-safe polymorphic components that doesn't crash typescript, this package was based off of [react-polymorphic-types](https://github.com/kripod/react-polymorphic-types).
 
-**Be warned ye who use this package**! No.. seriously be sure to check the source code before using this, There are things in there that I can't explain how they work, it just does, and I'm scared. If you do know how they work, feel free to either open an issue or submit a PR that changes the comments I placed into something that explains it.
+**Be warned ye who use this package!**: though I'm certain everything should work fine, I am still a novice in both typescript's quirkiness and react's uncommon types, some types might even rely on bugs to work correctly, so take caution!
 
 ## Basic Usage
 
@@ -22,14 +22,44 @@ const Button: PolymorphicComponent<"button", Props> = ({
 };
 ```
 
-notice the button's props already have `as` attribute, this is provided when you use the `PolymorphicComponent` type, speaking of which, the `PolymorphicComponent` type expects 2 optional arguments, the default type (which extends `ElementType`) and additional props.
+notice the button's props already have an `as` property, this is provided when you use the `PolymorphicComponent` type, speaking of which, notice we gave 2 arguments to `PolymorphicComponent`, the default type of your component (which extends `ElementType`) and an optional generic for your props, these additional props won't change when polymorphing.
 
 when used, the props change depending on whatever is passed to `as`, as well as the additional props you gave.
 
 ```tsx
-  <Button type="submit" size="small"> I am a button! </Button>
+  <Button type="submit" size="small"> I am a button!</Button>
   <Button as={"a"} href="" size="large"> I became an achor!</Button>
 ```
+
+## Limiting the `as` prop
+
+If you only want your component to either polymorph into a button or an ancor element, you can provide it as the third type to `PolymorphicComponent`, this third argument should use the `OnlyAs` type:
+
+```tsx
+type Props = {
+  size?: "small" | "large";
+};
+
+const Button: PolymorphicComponent<"button", Props, OnlyAs<"button" | "a">> = ({
+  as: As = "button",
+  size,
+  ...props
+}) => {
+  return <As {...props} />;
+};
+```
+
+Now when we try polymorphing into a div, typescript will complain:
+
+```tsx
+  <Button type={"submit"} size="small"> I am a button!</Button>
+  <Button as={"a"} href="" size="large"> I became an achor!</Button>
+  <Button as={"div"}> I can't be a div!</Button> // error
+```
+
+## Common generic types
+
+All polymorphic component types share the same arguments, the first being the `Default` type, second is an optional `Props`, the third is an optional `OnlyAs` type where you can specify what element can the component polymorph into.
 
 ## Supporting `forwardRef()`
 
@@ -49,9 +79,15 @@ const Button = forwardRef<"button", Props>(
 
 This should now expose the `ref` attribute and will correctly change based on the `as` prop. If the component given to the `as` prop does not support refs then it will not show. The one drawback to using this is having one extra item on the call stack which is pretty negligible.
 
-## Typing `memo()`
+Note that forwardRef also supports the `OnlyAs` type:
 
-Unlike `React.forwardRef`, memo doesn't need any special functions to make work, we can simply narrow its type down like so:
+```tsx
+const ButtonOrLink = forwardRef<"button", Props, OnlyAs<"button" | "a">> () => //...
+```
+
+## Typing `memo()` and `lazy()`
+
+Unlike `React.forwardRef`, memo and lazy doesn't need any special functions to make work, we can simply narrow its type down like so:
 
 ```tsx
 type Props = {
@@ -66,12 +102,11 @@ const Button: PolymorphicComponent<"button", Props> = ({
   return <As {...props} />;
 };
 
-// note that all exotic components have the same generics as `PolymorphicComponent`
 const MemoButton: PolyMemoExoticComponent<"button", Props> =
   React.memo("button");
 ```
 
-Note that if the component you're trying to `memo()` forwards refs, use the `PolyForwardMemoExoticComponent` to preserve the `ref` property instead.
+Note that if the component you're trying to `memo()` or `lazy()` forwards refs, use the `PolyForwardMemoExoticComponent` or the `PolyForwardLazyExoticComponent` to preserve the `ref` property.
 
 ```tsx
 type Props = {

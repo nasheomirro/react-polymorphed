@@ -1,5 +1,9 @@
 {
   "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "react-polymorphed": ["src/index.ts"]
+    },
     "target": "es5",
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,

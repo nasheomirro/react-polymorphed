@@ -20,7 +20,18 @@ export type WithAs<
   Type extends ElementType = ElementType
 > = { as?: Type } & Props;
 
-// Idk how this works, I'm scared
+// take this explanation with a pinch of salt, i'm only guessing:
+//
+// If the restrictions are only JSX.IntrinsicElement restrictions, typescript
+// will understand what the props will be and therefore make an assumption that
+// the props will either be props<a> | props<button> | etc.. Now the problem is when
+// `as` is used typescript will say that there is a possibility that `as` will be "a" and props
+// will be "props<button>", we know that that isn't possible but there is no way to tell
+// typescript that it will never happen.
+//
+// That's why when we add a function to the union, typescript won't know for sure what the props
+// of that function will be so it won't bother checking, now it just marks props as props<T> and `as`
+// as T and only checks when the component is used.
 export type OnlyAs<T extends ElementType> = T | (() => null);
 
 // ----------------------------------------------
@@ -83,9 +94,6 @@ export interface CallWithRef<
   ): ReactElement | null;
 }
 
-/**
- * Make your component Polymorphic.
- */
 export interface PolymorphicComponent<
   Default extends OnlyAs,
   Props extends object = {},
