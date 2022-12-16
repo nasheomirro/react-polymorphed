@@ -3,15 +3,19 @@ import React, { ElementType, ForwardRefRenderFunction } from "react";
 import { PolyForwardExoticComponent, WithAs } from "../types";
 
 /**
- * React.forwardRef but typed in a way to support Polymorphic Components,
- * apart from typing it's just forwardRef with an extra call stack on top.
- * Note that you should only use this for dealing with Polymorphic Components.
+ * React.forwardRef but typed in a way to help create polymorphic components,
+ * note that you should only use this for that purpose
  */
 function forwardRef<
-  Default extends ElementType = ElementType,
-  P extends object = {}
->(Component: ForwardRefRenderFunction<any, WithAs<P>>) {
-  return React.forwardRef(Component) as PolyForwardExoticComponent<Default, P>;
+  Default extends OnlyAs,
+  P extends object = {},
+  OnlyAs extends ElementType = ElementType
+>(Component: ForwardRefRenderFunction<any, WithAs<P, OnlyAs>>) {
+  return React.forwardRef(Component) as unknown as PolyForwardExoticComponent<
+    Default,
+    P,
+    OnlyAs
+  >;
 }
 
 export default forwardRef;

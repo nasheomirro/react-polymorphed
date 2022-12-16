@@ -14,11 +14,14 @@ import React, {
 
 export type Merge<A, B> = Omit<A, keyof B> & B;
 
-/** Adds `as` property as an optional prop if Props doesn't already have the `as` property. */
+/** Adds `as` property as an optional prop */
 export type WithAs<
-  Props extends object = {},
+  Props extends object,
   Type extends ElementType = ElementType
 > = { as?: Type } & Props;
+
+// Idk how this works, I'm scared
+export type OnlyAs<T extends ElementType> = T | (() => null);
 
 // ----------------------------------------------
 // PROP TYPES
@@ -27,9 +30,8 @@ export type WithAs<
 // for some reason, removing PropsWithRef<T> from this type makes this a lot faster.
 // don't ask me how, it just does. The PropsWithRef<T> type was just lifted to the top.
 //
-// I'm guessing its because its not being cached by typescript and also its been
-// placed inside a conditional (`PropsWithRef<ComponentProps<T>>`), typescript is going
-// through it for every element type.
+// I'm guessing its because its not being cached by typescript because it's
+// placed inside a conditional (`PropsWithRef<ComponentProps<T>>`)
 export type _ComponentPropsWithRef<T extends ElementType> = T extends new (
   props: infer P
 ) => Component<any, any>
@@ -61,20 +63,22 @@ interface ComponentBase {
   id?: string;
 }
 
-interface CallWithoutRef<
-  Default extends ElementType = ElementType,
-  Props extends object = {}
+export interface CallWithoutRef<
+  Default extends OnlyAs,
+  Props extends object = {},
+  OnlyAs extends ElementType = ElementType
 > {
-  <Component extends ElementType = Default>(
+  <Component extends OnlyAs = Default>(
     props: PolymorphicPropsWithoutRef<Component, Props>
   ): ReactElement | null;
 }
 
-interface CallWithRef<
-  Default extends ElementType = ElementType,
-  Props extends object = {}
+export interface CallWithRef<
+  Default extends OnlyAs,
+  Props extends object = {},
+  OnlyAs extends ElementType = ElementType
 > {
-  <Component extends ElementType = Default>(
+  <Component extends OnlyAs = Default>(
     props: PolymorphicPropsWithRef<Component, Props>
   ): ReactElement | null;
 }
@@ -83,20 +87,22 @@ interface CallWithRef<
  * Make your component Polymorphic.
  */
 export interface PolymorphicComponent<
-  Default extends ElementType = ElementType,
-  Props extends object = {}
+  Default extends OnlyAs,
+  Props extends object = {},
+  OnlyAs extends ElementType = ElementType
 > extends ComponentBase,
-    CallWithoutRef<Default, Props> {}
+    CallWithoutRef<Default, Props, OnlyAs> {}
 
 /**
  * adds the ref attribute to PolymorphicComponent, usually you shouldn't
  * have to use this as you can just use `forwardRef()`
  */
 export interface PolymorphicComponentWithRef<
-  Default extends ElementType = ElementType,
-  Props extends object = {}
+  Default extends OnlyAs,
+  Props extends object = {},
+  OnlyAs extends ElementType = ElementType
 > extends ComponentBase,
-    CallWithRef<Default, Props> {}
+    CallWithRef<Default, Props, OnlyAs> {}
 
 // ----------------------------------------------
 // EXOTIC COMPONENTS
@@ -107,20 +113,25 @@ export interface PolymorphicComponentWithRef<
 // ----------------------------------------------
 
 export type PolyForwardExoticComponent<
-  Default extends ElementType,
-  Props extends object = {}
-> = Merge<ForwardRefExoticComponent<{}>, CallWithRef<Default, Props>>;
+  Default extends OnlyAs,
+  Props extends object = {},
+  OnlyAs extends ElementType = ElementType
+> = Merge<
+  ForwardRefExoticComponent<Props & { [key: string]: unknown }>,
+  CallWithRef<Default, Props, OnlyAs>
+>;
 
 /**
  * MemoExoticComponent but with support for polymorph. Note that if your polymorphic component
  * has ref forwarded, you should use `PolyForwardMemoExoticComponent` instead.
  */
 export type PolyMemoExoticComponent<
-  Default extends ElementType,
-  Props extends object = {}
+  Default extends OnlyAs,
+  Props extends object = {},
+  OnlyAs extends ElementType = ElementType
 > = Merge<
   MemoExoticComponent<React.ComponentType<any>>,
-  CallWithoutRef<Default, Props>
+  CallWithoutRef<Default, Props, OnlyAs>
 >;
 
 /**
@@ -128,27 +139,36 @@ export type PolyMemoExoticComponent<
  * makes it clear that the component does support refs if possible.
  */
 export type PolyForwardMemoExoticComponent<
-  Default extends ElementType,
-  Props extends object = {}
+  Default extends OnlyAs,
+  Props extends object = {},
+  OnlyAs extends ElementType = ElementType
 > = Merge<
   MemoExoticComponent<React.ComponentType<any>>,
-  CallWithRef<Default, Props>
+  CallWithRef<Default, Props, OnlyAs>
 >;
 
-// TODO: I never used Lazy Components, there might be some problems
-// with components being passed that aren't ref-forwarded.
+/**
+ * LazyExoticComponent but with support for polymorph. Note that if your polymorphic component
+ * has ref forwarded, you should use `PolyForwardMemoExoticComponent` instead.
+ */
 export type PolyLazyExoticComponent<
-  Default extends ElementType,
-  Props extends object = {}
+  Default extends OnlyAs,
+  Props extends object = {},
+  OnlyAs extends ElementType = ElementType
 > = Merge<
   LazyExoticComponent<React.ComponentType<any>>,
-  CallWithoutRef<Default, Props>
+  CallWithoutRef<Default, Props, OnlyAs>
 >;
 
-export type PolyLazyExoticRefComponent<
-  Default extends ElementType,
-  Props extends object = {}
+/**
+ * LazyExoticComponent but with support for polymorph.
+ * makes it clear that the component does support refs if possible.
+ */
+export type PolyForwardLazyExoticComponent<
+  Default extends OnlyAs,
+  Props extends object = {},
+  OnlyAs extends ElementType = ElementType
 > = Merge<
   LazyExoticComponent<React.ComponentType<any>>,
-  CallWithRef<Default, Props>
+  CallWithRef<Default, Props, OnlyAs>
 >;

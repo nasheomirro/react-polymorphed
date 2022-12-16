@@ -1,5 +1,5 @@
 {
-  "name": "react-assert-polymorph",
+  "name": "react-polymorphed",
   "version": "0.0.1",
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
