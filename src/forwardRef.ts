@@ -1,6 +1,6 @@
 // Stolen from chakra-ui
 import React, { ElementType, ForwardRefRenderFunction } from "react";
-import { PolyForwardExoticComponent, WithAs } from "../types";
+import { PolyForwardExoticComponent, WithAs } from "./types";
 
 /**
  * React.forwardRef but typed in a way to help create polymorphic components,
