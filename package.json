@@ -18,11 +18,13 @@
   },
   "keywords": [
     "react",
-    "polymoprhic",
+    "polymoprhic-components",
     "as-prop"
   ],
-  "author": "",
-  "license": "ISC",
+  "homepage": "https://github.com/nasheomirro/react-polymorphed",
+  "author": "Shane Rimoro (nasheomirro)",
+  "license": "MIT",
+  "description": "Build fast type-safe Polymorphic components with ease.",
   "devDependencies": {
     "@rollup/plugin-alias": "^4.0.2",
     "@rollup/plugin-commonjs": "^23.0.3",
