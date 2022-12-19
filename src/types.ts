@@ -12,13 +12,11 @@ import React, {
   RefAttributes,
 } from "react";
 
-export type Merge<A, B> = Omit<A, keyof B> & B;
+// ----------------------------------------------
+// UTILS
+// ----------------------------------------------
 
-type ValidProps<
-  Props extends object,
-  Restriction extends object,
-  ToMerge extends object
-> = Props extends Restriction ? Merge<Props, ToMerge> : never;
+export type Merge<A, B> = Omit<A, keyof B> & B;
 
 /** Adds `as` property as an optional prop */
 export type WithAs<
@@ -26,56 +24,49 @@ export type WithAs<
   Type extends ElementType = ElementType
 > = { as?: Type } & Props;
 
-/*
- * This makes ComponentProps<T> to unknown, which lets us avoid the "a" can have "b" props problem
- *
- * let's say T is "a" | "b", which means it's props will be ComponentProps<a> | ComponentProps<B>,
- * now when we use our component inside the function body, typescript will complain that there is a
- * possibility that our component will be "a" and our props would be "ComponentProps<B>" which are
- * incompatible, we know for ourselves that this isn't possible but typescript doesn't pick up on that.
- *
- * That's why we make it so that ComponentProps<T> would be unknown, props would be unknown in this case.
- */
-export type OnlyAs<T extends ElementType = ElementType, P = unknown> =
-  | T
-  | ((props: P) => null);
+export type Restrict<
+  T extends ElementType = ElementType,
+  P extends object = {}
+> = [
+  // did not test enough (or at all) if this will shoot me in the foot
+  T | ((props: P) => ReactElement<never, never>),
+  P
+];
 
-export type Restrict<P = any, T extends ElementType = ElementType> = [P, T];
+type ValidateProps<
+  Component extends ElementType,
+  PP extends object,
+  CP extends object,
+  RP extends object
+> =
+  // intent is usually if CP can be provided with RP props,
+  // this makes sure that { a?: string } can extend { a: string }.
+  // so user doesn't have RP be { a?: string } and accidentally
+  // allow empty objects ({}) to extend { a?: string }
+  Required<CP> extends RP
+    // Omitting RP is a stylistic choice, not sure how good the decision is
+    ? Merge<Omit<CP, keyof RP>, WithAs<PP, Component>>
+    : // let it still provide intellisense
+      { as: Component } & Record<string, never>;
 
 // ----------------------------------------------
 // PROP TYPES
 // ----------------------------------------------
 
 // for some reason, removing PropsWithRef<T> from this type makes this a lot faster.
-// don't ask me how, it just does. The PropsWithRef<T> type was just lifted to the top.
-//
-// I'm guessing its because its not being cached by typescript because it's
-// placed inside a conditional (`PropsWithRef<ComponentProps<T>>`)
+// The PropsWithRef<T> type was just lifted to the top.
 export type _ComponentPropsWithRef<T extends ElementType> = T extends new (
   props: infer P
 ) => Component<any, any>
   ? PropsWithoutRef<P> & RefAttributes<InstanceType<T>>
   : ComponentProps<T>;
 
-export type PolymorphicPropsWithoutRef<
-  Component extends ElementType,
-  Props extends object = {},
-  Restriction extends object = any
-> = ValidProps<
-  ComponentPropsWithoutRef<Component>,
-  Restriction,
-  WithAs<Props, Component>
->;
+// cause why not?
+export type PolymorphicPropsWithoutRef<Component extends ElementType> =
+  ComponentPropsWithoutRef<Component>;
 
-export type PolymorphicPropsWithRef<
-  Component extends ElementType,
-  Props extends object = {},
-  Restriction extends object = any
-> = ValidProps<
-  PropsWithRef<_ComponentPropsWithRef<Component>>,
-  Restriction,
-  WithAs<Props, Component>
->;
+export type PolymorphicPropsWithRef<Component extends ElementType> =
+  PropsWithRef<_ComponentPropsWithRef<Component>>;
 
 // ----------------------------------------------
 // COMPONENT TYPES
@@ -93,57 +84,47 @@ export interface CallWithoutRef<
   Default extends OnlyAs,
   Props extends object = {},
   OnlyAs extends ElementType = ElementType,
-  HasProps extends object = any
+  HasProps extends object = {}
 > {
-  <Component extends OnlyAs = Default>(
-    props: PolymorphicPropsWithoutRef<Component, Props, HasProps>
+  <T extends OnlyAs = Default>(
+    props: ValidateProps<T, Props, PolymorphicPropsWithoutRef<T>, HasProps>
   ): ReactElement | null;
 }
 
 export interface CallWithRef<
-  Default extends Restriction,
+  Default extends OnlyAs,
   Props extends object = {},
-  Restriction extends ElementType = ElementType,
-  RestrictProps extends object = any
+  OnlyAs extends ElementType = ElementType,
+  HasProps extends object = {}
 > {
-  <Component extends Restriction = Default>(
-    props: PolymorphicPropsWithRef<Component, Props, RestrictProps>
+  <Component extends OnlyAs = Default>(
+    props: ValidateProps<
+      Component,
+      Props,
+      PolymorphicPropsWithRef<Component>,
+      HasProps
+    >
   ): ReactElement | null;
 }
 
 export interface PolymorphicComponent<
-  Default extends Restriction[1],
+  Default extends Restriction[0],
   Props extends object = {},
   Restriction extends Restrict = Restrict
 > extends ComponentBase,
-    CallWithoutRef<Default, Props, Restriction[1], Restriction[0]> {}
-
-/**
- * adds the ref attribute to PolymorphicComponent, usually you shouldn't
- * have to use this as you can just use `forwardRef()`
- */
-export interface PolymorphicComponentWithRef<
-  Default extends OnlyAs,
-  Props extends object = {},
-  OnlyAs extends ElementType = ElementType
-> extends ComponentBase,
-    CallWithRef<Default, Props, OnlyAs> {}
+    CallWithoutRef<Default, Props, Restriction[0], Restriction[1]> {}
 
 // ----------------------------------------------
 // EXOTIC COMPONENTS
-//
-// $Merge below isn't actually doing anything except for removing the call signatures off of
-// the first type passed (Omit<A, never> & B), then we replace the call signature with our generic
-// function.
 // ----------------------------------------------
 
 export type PolyForwardExoticComponent<
-  Default extends OnlyAs,
+  Default extends Restriction[0],
   Props extends object = {},
-  OnlyAs extends ElementType = ElementType
+  Restriction extends Restrict = Restrict
 > = Merge<
   ForwardRefExoticComponent<Props & { [key: string]: unknown }>,
-  CallWithRef<Default, Props, OnlyAs>
+  CallWithRef<Default, Props, Restriction[0], Restriction[1]>
 >;
 
 /**
@@ -151,12 +132,12 @@ export type PolyForwardExoticComponent<
  * has ref forwarded, you should use `PolyForwardMemoExoticComponent` instead.
  */
 export type PolyMemoExoticComponent<
-  Default extends OnlyAs,
+  Default extends Restriction[0],
   Props extends object = {},
-  OnlyAs extends ElementType = ElementType
+  Restriction extends Restrict = Restrict
 > = Merge<
   MemoExoticComponent<React.ComponentType<any>>,
-  CallWithoutRef<Default, Props, OnlyAs>
+  CallWithoutRef<Default, Props, Restriction[0], Restriction[1]>
 >;
 
 /**
@@ -164,12 +145,12 @@ export type PolyMemoExoticComponent<
  * makes it clear that the component does support refs if possible.
  */
 export type PolyForwardMemoExoticComponent<
-  Default extends OnlyAs,
+  Default extends Restriction[0],
   Props extends object = {},
-  OnlyAs extends ElementType = ElementType
+  Restriction extends Restrict = Restrict
 > = Merge<
   MemoExoticComponent<React.ComponentType<any>>,
-  CallWithRef<Default, Props, OnlyAs>
+  CallWithRef<Default, Props, Restriction[0], Restriction[1]>
 >;
 
 /**
@@ -177,12 +158,12 @@ export type PolyForwardMemoExoticComponent<
  * has ref forwarded, you should use `PolyForwardMemoExoticComponent` instead.
  */
 export type PolyLazyExoticComponent<
-  Default extends OnlyAs,
+  Default extends Restriction[0],
   Props extends object = {},
-  OnlyAs extends ElementType = ElementType
+  Restriction extends Restrict = Restrict
 > = Merge<
   LazyExoticComponent<React.ComponentType<any>>,
-  CallWithoutRef<Default, Props, OnlyAs>
+  CallWithoutRef<Default, Props, Restriction[0], Restriction[1]>
 >;
 
 /**
@@ -190,10 +171,10 @@ export type PolyLazyExoticComponent<
  * makes it clear that the component does support refs if possible.
  */
 export type PolyForwardLazyExoticComponent<
-  Default extends OnlyAs,
+  Default extends Restriction[0],
   Props extends object = {},
-  OnlyAs extends ElementType = ElementType
+  Restriction extends Restrict = Restrict
 > = Merge<
   LazyExoticComponent<React.ComponentType<any>>,
-  CallWithRef<Default, Props, OnlyAs>
+  CallWithRef<Default, Props, Restriction[0], Restriction[1]>
 >;

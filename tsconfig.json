@@ -19,4 +19,5 @@
     "allowSyntheticDefaultImports": true,
     "emitDeclarationOnly": true
   },
+  "exclude": ["types", "dist"]
 }

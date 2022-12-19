@@ -50,7 +50,7 @@ const Button = forwardRef<"button", Props>(
 );
 ```
 
-the `forwardRef()` function is completely the same as `React.forwardRef()` but is typed to support polymorphic components. Note that this does use type-casting inside.
+the `forwardRef()` function is completely the same as `React.forwardRef()` but is typed to support polymorphic components. Note that this does use type-casting inside, Note that `forwardRef()` has the exact same generics as `PolymorphicComponent`.
 
 This should now expose the ref property and will correctly change it's type based on the `as` prop. If the component given to the `as` prop does not support refs then it will not show.
 
@@ -109,88 +109,122 @@ const MemoRefButton: PolyForwardMemoExoticComponent<"button", Props> =
 
 ## Restricting the `as` prop
 
-If you want to restrict what the `as` prop can be, for example it should only be able to become a button or an anchor tag, you can pass an additional type to `PolymorphicComponent`. This type has to extend from `React.ElementType` and has to be wrapped inside our `OnlyAs<T>` utility type.
+You can restrict what the `as` prop can be in two ways, restricting its `ElementType` or its props. You can use either one or both at the same time.
+
+### Element Restriction
+
+Say you wanted your button to only be "button" | "a", you can pass an `Restrict` type to the `PolymorphicComponent`:
 
 ```tsx
-import { OnlyAs, PolymorphicComponent } from "react-polymorphed";
+import React from "react";
+import { PolymorphicComponent, Restrict } from "react-polymorphed";
 
-type Props = {
-  size?: "small" | "large";
-};
-
-const Button: PolymorphicComponent<"button", Props, OnlyAs<"button" | "a">> = ({
+const Button: PolymorphicComponent<"button", {}, Restrict<"button" | "a">> = ({
   as: As = "button",
-  size,
   ...props
 }) => {
   return <As {...props} />;
 };
+
+<Button />;
+<Button as="a" />;
+<Button as="div" />; // error!
 ```
 
-Then when used we can only have either a "button" or an "a" tag.
+⚠️ One caveat is that we cannot check for the default component `As` if it is a "button" | "a":
 
 ```tsx
-<Button as={"div"} /> // error!
-<Button as={"a"} />
+// ...
+  as: As = "div", // doesn't error
+// ...
 ```
 
-Note that this is also possible in our `forwardRef()` function:
+### Prop Restriction
+
+If you need to check whether or not the component passed can accept a `className` prop, you can pass the `Restrict` type another argument:
 
 ```tsx
-import { forwardRef, OnlyAs } from "react-polymorphed";
-
-type Props = {
-  size?: "small" | "large";
-};
-
-const ButtonOrLink = forwardRef<"button", Props, OnlyAs<"button" | "a">>(
-  ({ as: As = "button", size, ...props }, ref) => {
-    return <As ref={ref} {...props} />;
-  }
-);
-
-<ButtonOrLink as="a" />;
-<ButtonOrLink as="div" />; // error!
-```
-
-## Advanced Restrictions
-
-This is where it gets dicey, let's say we only want to accept components that have a `className` prop, we could do this:
-
-```tsx
-import { ElementType } from "react";
-import { OnlyAs, PolymorphicComponent } from "react-polymorphed";
-
-type Props = {
-  size?: "small" | "large";
-};
+import React, { ElementType } from "react";
+import { PolymorphicComponent, Restrict } from "react-polymorphed";
 
 const Button: PolymorphicComponent<
   "button",
-  Props,
-  OnlyAs<ElementType<{ className?: string }>>
-> = ({ as: As = "button", size, ...props }) => {
+  {},
+  Restrict<ElementType, { className: string }>
+> = ({ as: As = "button", ...props }) => {
   return <As {...props} />;
 };
-```
-What you'll then notice is a huge drop in intellisense, this is because typescript is trying to understand what the `As` component's props will be. If you're in VS Code, try pressing `Ctrl` + `space` inside the `As` component, you'll notice a huge amount of props. This is basically all the props of every intrinsic element combined, which is about 183 prop types! Some of you will even experience a "Expression produces a union type that is too complex to represent." typescript error!
 
-But fear not, there is one simple solution here, and that is to ignore them, not like actually ignore them but to widen our `As` component's type:
+<Button />;
+<Button as={"a"} />;
+<Button as="div" />;
+<Button as={() => null} />; // error!
+```
+
+Note that this does omit `className` from the original component props, this is because it assumes that if you provide a prop restriction, then that means that you will replace it inside your polymorphic component:
+
+```tsx
+<Button className="oi" /> // error: className doesn't exist in button props.
+```
+
+If you wanted to have users be able to pass `className` anyways, like say to override or to add then you can simply provide it on your additional props:
 
 ```tsx
 const Button: PolymorphicComponent<
   "button",
-  Props,
-  OnlyAs<ElementType<{ className?: string }>>
-> = ({ as: As, size, ...props }) => {
-  const Elem: ElementType = As || "button"
+  { className?: string },
+  Restrict<ElementType, { className: string }>
+> = ({ as: As = "button", className, ...props }) => {
   return <As {...props} />;
 };
 ```
-This way, we turn off prop-checking for the `As` component since we widened it to `ElementType`, more specifically `ElementType<any>`.
 
-But it still feels laggy, that's because we're still comparing every intrinsic element if `{ className?: string }` extends their props, but we already know that every element can accept a className, so we can make it so that typescript will ignore checking them:
+⚠️ Note that unlike Element Restriction, this only checks when used, you can see what I mean here:
 
 ```tsx
-type Restriction = OnlyAs<keyof JSX.IntrinsicElements | ComponentType<{ className?: string }>>
+const Button: PolymorphicComponent<
+  () => null, // typescript won't complain
+  {},
+  Restrict<ElementType, { className: string }>
+> = // ...
+;
+
+<Button /> // then complains that the default props are incorrect
 ```
+
+⚠️ This also leads to some cryptic errors that might make your users confused.
+
+```tsx
+<Button as={() => null} />
+// Type '{ as: () => null; }' is not assignable to type 'Record<string, never>'.
+```
+
+<details>
+<summary><strong>Why not just <code>ElementType<{ className: string }></code>?</strong></summary>
+
+First off it's quite slow, you can actually try this out by using `Restrict<ElementType<{ className?: string }>>`. There are ways to potentially make this faster like maybe ignoring intrinsic elements and only checking for component types, like this: `Restrict<keyof JSX.IntrinsicElements | ComponentType<{ className?: string }>>`.
+
+But the next problem is this:
+
+```tsx
+type A = (props: {}) = any;
+type B = (props: { className?: string }) => any;
+
+type C = A extends B ? true : never; // true!
+```
+
+the type of `{}` extends `{ className?: string }`, and that's because `className` is optional, so what if we make it not optional:
+
+```tsx
+type A = (props: {}) => any;
+type B = (props: { className: string }) => any;
+
+type C = A extends B ? true : never; // never!
+// but then
+type D = (props: { className?: string }) => any;
+type E = D extends B ? true : never; // never!
+```
+
+clearly type of `D` does support being passed a `className` prop but it doesn't extend `B`! I'll stop here as there could be more weird edge-cases, plus this is just one property `className`. So because of these interactions, I decided to just check if the props are valid using `ValidateProps`.
+
+</details>

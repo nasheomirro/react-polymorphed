@@ -16,7 +16,7 @@ const Example = () => {
   return (
     <>
       <Button ref={buttonRef} />
-      {/* error! */}
+      {/* @ts-expect-error */}
       <Button as="div" ref={buttonRef} />
     </>
   );
