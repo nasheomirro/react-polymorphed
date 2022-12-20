@@ -13,26 +13,18 @@ import React, {
   RefAttributes,
 } from "react";
 
+export {};
+
 // ----------------------------------------------
 // UTILS
 // ----------------------------------------------
 
-export type Merge<A, B> = Omit<A, keyof B> & B;
+type Merge<A, B> = Omit<A, keyof B> & B;
 
 /** Adds `as` property as an optional prop */
-export type WithAs<
-  Props extends object,
-  Type extends ElementType = ElementType
-> = { as?: Type } & Props;
-
-export type Restrict<
-  T extends ElementType = ElementType,
-  P extends object = {}
-> = [
-  // did not test enough (or at all) if this will shoot me in the foot
-  T | ((props: P) => ReactElement<never, never>),
-  P
-];
+type WithAs<Props extends object, Type extends ElementType = ElementType> = {
+  as?: Type;
+} & Props;
 
 type ValidateProps<
   Component extends ElementType,
@@ -49,13 +41,14 @@ type ValidateProps<
     : // let it still provide intellisense
       { as: Component } & Record<string, never>;
 
-type PolyRefFunction = <
-  Default extends Restriction[0],
-  Props extends object = {},
-  Restriction extends Restrict = Restrict
->(
-  Component: ForwardRefRenderFunction<any, WithAs<Props, Restriction[0]>>
-) => PolyForwardExoticComponent<Default, Props, Restriction>;
+export type Restrict<
+  T extends ElementType = ElementType,
+  P extends object = {}
+> = [
+  // did not test enough (or at all) if this will shoot me in the foot
+  T | ((props: P) => ReactElement<never, never>),
+  P
+];
 
 // ----------------------------------------------
 // PROP TYPES
@@ -69,11 +62,17 @@ export type _ComponentPropsWithRef<T extends ElementType> = T extends new (
   ? PropsWithoutRef<P> & RefAttributes<InstanceType<T>>
   : ComponentProps<T>;
 
-export type PolymorphicPropsWithoutRef<Component extends ElementType> =
-  ComponentPropsWithoutRef<Component>;
+export type PolymorphicPropsWithoutRef<
+  T extends ElementType,
+  Props extends object = {},
+  HasProps extends object = {}
+> = ValidateProps<T, Props, ComponentPropsWithoutRef<T>, HasProps>;
 
-export type PolymorphicPropsWithRef<Component extends ElementType> =
-  PropsWithRef<_ComponentPropsWithRef<Component>>;
+export type PolymorphicPropsWithRef<
+  T extends ElementType,
+  Props extends object = {},
+  HasProps extends object = {}
+> = ValidateProps<T, Props, PropsWithRef<_ComponentPropsWithRef<T>>, HasProps>;
 
 // ----------------------------------------------
 // COMPONENT TYPES
@@ -94,7 +93,7 @@ export interface CallWithoutRef<
   HasProps extends object = {}
 > {
   <T extends OnlyAs = Default>(
-    props: ValidateProps<T, Props, PolymorphicPropsWithoutRef<T>, HasProps>
+    props: PolymorphicPropsWithoutRef<T, Props, HasProps>
   ): ReactElement | null;
 }
 
@@ -104,13 +103,8 @@ export interface CallWithRef<
   OnlyAs extends ElementType = ElementType,
   HasProps extends object = {}
 > {
-  <Component extends OnlyAs = Default>(
-    props: ValidateProps<
-      Component,
-      Props,
-      PolymorphicPropsWithRef<Component>,
-      HasProps
-    >
+  <T extends OnlyAs = Default>(
+    props: PolymorphicPropsWithRef<T, Props, HasProps>
   ): ReactElement | null;
 }
 
@@ -185,3 +179,16 @@ export type PolyForwardLazyExoticComponent<
   LazyExoticComponent<React.ComponentType<any>>,
   CallWithRef<Default, Props, Restriction[0], Restriction[1]>
 >;
+
+// ----------------------------------------------
+// FUNCTION TYPES
+// cast at your own risk.
+// ----------------------------------------------
+
+export type PolyRefFunction = <
+  Default extends Restriction[0],
+  Props extends object = {},
+  Restriction extends Restrict = Restrict
+>(
+  Component: ForwardRefRenderFunction<any, WithAs<Props, Restriction[0]>>
+) => PolyForwardExoticComponent<Default, Props, Restriction>;

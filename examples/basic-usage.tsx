@@ -1,5 +1,5 @@
 import React from "react";
-import { PolymorphicComponent } from "react-polymorphed";
+import { PolymorphicComponent } from "index";
 
 type Props = {
   size?: "small" | "large";

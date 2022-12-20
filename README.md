@@ -162,7 +162,7 @@ const Button: PolymorphicComponent<
 <Button as={() => null} />; // error!
 ```
 
-Note that this does omit `className` from the original component props, this is because it assumes that if you provide a prop restriction, then that means that you will replace it inside your polymorphic component:
+This does omit `className` from the original component props, this is because it assumes that if you provide a prop restriction, then that means that you will replace it inside your polymorphic component:
 
 ```tsx
 <Button className="oi" /> // error: className doesn't exist in button props.

@@ -1,5 +1,5 @@
 import React, { ElementType } from "react";
-import { PolymorphicComponent, Restrict } from "react-polymorphed";
+import { PolymorphicComponent, Restrict } from "index";
 
 const Button: PolymorphicComponent<
   "button",

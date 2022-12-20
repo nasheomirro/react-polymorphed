@@ -4,7 +4,6 @@
     "paths": {
       "react-polymorphed": ["index.d.ts"]
     },
-    "target": "es5",
     "noEmit": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
