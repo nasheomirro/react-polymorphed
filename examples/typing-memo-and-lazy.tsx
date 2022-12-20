@@ -2,9 +2,11 @@ import React from "react";
 import {
   PolymorphicComponent,
   PolyMemoExoticComponent,
-  forwardRef,
+  PolyRefFunction,
   PolyForwardMemoExoticComponent,
 } from "react-polymorphed";
+
+const polyRef = React.forwardRef as PolyRefFunction;
 
 type Props = {
   size?: "small" | "large";
@@ -18,7 +20,7 @@ const Button: PolymorphicComponent<"button", Props> = ({
   return <As {...props} />;
 };
 
-const RefButton = forwardRef<"button", Props>(
+const RefButton = polyRef<"button", Props>(
   ({ as: As = "button", size, ...props }) => {
     return <As {...props} />;
   }

@@ -34,23 +34,24 @@ We can then use this polymorphic component like so:
 
 ## Supporting `forwardRef()`
 
-The easiest way to create ref-forwarded polymorphic components is to use the `forwardRef()` function, not the one from react but the one from this package:
+The easiest way to create ref-forwarded polymorphic components is to use cast the `forwardRef` function to `PolyRefFunction`:
 
 ```tsx
-import { forwardRef } from "react-polymorphed";
+import { forwardRef } from "react";
+import { PolyRefFunction } from "react-polymorphed";
+
+const polyRef = forwardRef as PolyRefFunction;
 
 type Props = {
   size?: "small" | "large";
 };
 
-const Button = forwardRef<"button", Props>(
+const Button = polyRef<"button", Props>(
   ({ as: As = "button", size, ...props }) => {
     return <As {...props} />;
   }
 );
 ```
-
-the `forwardRef()` function is completely the same as `React.forwardRef()` but is typed to support polymorphic components. Note that this does use type-casting inside, Note that `forwardRef()` has the exact same generics as `PolymorphicComponent`.
 
 This should now expose the ref property and will correctly change it's type based on the `as` prop. If the component given to the `as` prop does not support refs then it will not show.
 
