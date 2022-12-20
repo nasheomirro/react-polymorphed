@@ -4,6 +4,7 @@ import React, {
   ComponentPropsWithoutRef,
   ElementType,
   ForwardRefExoticComponent,
+  ForwardRefRenderFunction,
   LazyExoticComponent,
   MemoExoticComponent,
   PropsWithoutRef,
@@ -44,10 +45,17 @@ type ValidateProps<
   // so user doesn't have RP be { a?: string } and accidentally
   // allow empty objects ({}) to extend { a?: string }
   Required<CP> extends RP
-    // Omitting RP is a stylistic choice, not sure how good the decision is
     ? Merge<Omit<CP, keyof RP>, WithAs<PP, Component>>
     : // let it still provide intellisense
       { as: Component } & Record<string, never>;
+
+type PolyRefFunction = <
+  Default extends Restriction[0],
+  Props extends object = {},
+  Restriction extends Restrict = Restrict
+>(
+  Component: ForwardRefRenderFunction<any, WithAs<Props, Restriction[0]>>
+) => PolyForwardExoticComponent<Default, Props, Restriction>;
 
 // ----------------------------------------------
 // PROP TYPES
@@ -61,7 +69,6 @@ export type _ComponentPropsWithRef<T extends ElementType> = T extends new (
   ? PropsWithoutRef<P> & RefAttributes<InstanceType<T>>
   : ComponentProps<T>;
 
-// cause why not?
 export type PolymorphicPropsWithoutRef<Component extends ElementType> =
   ComponentPropsWithoutRef<Component>;
 

@@ -1,23 +1,13 @@
 {
   "name": "react-polymorphed",
-  "version": "1.0.0",
-  "main": "dist/cjs/index.js",
-  "module": "dist/esm/index.js",
-  "files": [
-    "dist"
-  ],
-  "types": "dist/index.d.ts",
+  "version": "1.1.0",
+  "types": "index.d.ts",
   "scripts": {
-    "build": "rollup -c",
-    "eslint": "eslint \"src/**/*.{js,ts,tsx}\"",
-    "prettier": "prettier --write \"src/**/*.{js,ts,tsx}\"",
-    "prepare": "npm run build",
-    "prepublishOnly": "npm run eslint",
-    "preversion": "npm run eslint",
-    "version": "npm run prettier"
+    "format": "prettier --write index.d.ts"
   },
   "keywords": [
     "react",
+    "typescript",
     "polymoprhic-components",
     "as-prop"
   ],
@@ -26,25 +16,11 @@
   "license": "MIT",
   "description": "Build fast type-safe Polymorphic components with ease.",
   "devDependencies": {
-    "@rollup/plugin-alias": "^4.0.2",
-    "@rollup/plugin-commonjs": "^23.0.3",
-    "@rollup/plugin-node-resolve": "^15.0.1",
-    "@rollup/plugin-terser": "^0.1.0",
-    "@rollup/plugin-typescript": "^10.0.1",
-    "@testing-library/react": "^13.4.0",
-    "@types/react": "^18.0.26",
-    "@typescript-eslint/eslint-plugin": "^5.45.1",
-    "@typescript-eslint/parser": "^5.45.1",
-    "eslint": "^8.29.0",
+    "@types/react": "^16.8",
     "prettier": "^2.8.0",
-    "react": "^18.2.0",
-    "rollup": "^3.5.1",
-    "rollup-plugin-dts": "^5.0.0",
-    "rollup-plugin-peer-deps-external": "^2.2.4",
-    "tslib": "^2.4.1",
     "typescript": "^4.9.4"
   },
   "peerDependencies": {
-    "react": "^18.2.0"
+    "@types/react": ">=16.8"
   }
 }

@@ -2,22 +2,18 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "react-polymorphed": ["src/index.ts"]
+      "react-polymorphed": ["index.d.ts"]
     },
     "target": "es5",
+    "noEmit": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "strict": true,
     "skipLibCheck": true,
     "jsx": "react",
-    "module": "ESNext",
     "declaration": true,
-    "declarationDir": "types",
     "sourceMap": true,
-    "outDir": "dist",
     "moduleResolution": "node",
-    "allowSyntheticDefaultImports": true,
-    "emitDeclarationOnly": true
-  },
-  "exclude": ["types", "dist"]
+    "allowSyntheticDefaultImports": true
+  }
 }
