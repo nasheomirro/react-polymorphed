@@ -34,7 +34,7 @@ We can then use this polymorphic component like so:
 
 ## Supporting `forwardRef()`
 
-The easiest way to create ref-forwarded polymorphic components is to use cast the `forwardRef` function to `PolyRefFunction`:
+The easiest way to create ref-forwarded polymorphic components is to cast the `forwardRef` function to `PolyRefFunction`:
 
 ```tsx
 import { forwardRef } from "react";
@@ -53,7 +53,7 @@ const Button = polyRef<"button", Props>(
 );
 ```
 
-This should now expose the ref property and will correctly change it's type based on the `as` prop. If the component given to the `as` prop does not support refs then it will not show.
+This should now expose the ref property and will correctly change it's type based on the `as` prop. If the component given to the `as` prop does not support refs then it will not let any refs be passed in.
 
 ## Typing `memo()` and `lazy()`
 
@@ -79,12 +79,12 @@ const Button: PolymorphicComponent<"button", Props> = ({
   return <As {...props} />;
 };
 
-const MemoButton: PolyMemoExoticComponent<"button", Props> = React.memo(Button);
+const MemoButton: PolyMemoExoticComponent<"button", Props> = 
+  React.memo(Button);
 
 // in another file:
-const LazyButton: PolyLazyExoticComponent<"button", Props> = React.lazy(
-  async () => import("./Button")
-);
+const LazyButton: PolyLazyExoticComponent<"button", Props> = 
+  React.lazy(async () => import("./Button"));
 ```
 
 Note that if the polymorphic component forwards refs, you need to use either the `PolyForwardMemoExoticComponent` or `PolyForwardLazyExoticComponent` to correctly preserve the ref property (A bit of a handful, I know).
@@ -132,7 +132,7 @@ const Button: PolymorphicComponent<"button", {}, Restrict<"button" | "a">> = ({
 <Button as="div" />; // error!
 ```
 
-⚠️ One caveat is that we cannot check for the default component `As` if it is a "button" | "a":
+⚠️ One caveat is that we cannot check for the default component `As` if it is a "button" | "a", this is actually present whether you use restrictions or not:
 
 ```tsx
 // ...
@@ -168,7 +168,7 @@ This does omit `className` from the original component props, this is because it
 <Button className="oi" /> // error: className doesn't exist in button props.
 ```
 
-If you wanted to have users be able to pass `className` anyways, like say to override or to add then you can simply provide it on your additional props:
+If you wanted to have users be able to pass `className` anyways, like say to override the default `className`, then you could just place it on your props:
 
 ```tsx
 const Button: PolymorphicComponent<
@@ -179,6 +179,8 @@ const Button: PolymorphicComponent<
   return <As {...props} />;
 };
 ```
+
+#### Caveats
 
 ⚠️ Note that unlike Element Restriction, this only checks when used, you can see what I mean here:
 
@@ -197,13 +199,17 @@ const Button: PolymorphicComponent<
 
 ```tsx
 <Button as={() => null} />
-// Type '{ as: () => null; }' is not assignable to type 'Record<string, never>'.
+// Type '{ as: () => null; }' is not assignable
+// to type 'Record<string, never>'.
 ```
 
 <details>
 <summary><strong>Why not just <code>ElementType<{ className: string }></code>?</strong></summary>
 
-First off it's quite slow, you can actually try this out by using `Restrict<ElementType<{ className?: string }>>`. There are ways to potentially make this faster like maybe ignoring intrinsic elements and only checking for component types, like this: `Restrict<keyof JSX.IntrinsicElements | ComponentType<{ className?: string }>>`.
+
+First off, it's quite slow, you can actually try this out by using `Restrict<ElementType<{ className?: string }>>`. 
+
+There are ways to potentially make this faster like maybe ignoring intrinsic elements and only checking for component types, like this: `Restrict<keyof JSX.IntrinsicElements | ComponentType<{ className?: string }>>`.
 
 But the next problem is this:
 
@@ -221,11 +227,12 @@ type A = (props: {}) => any;
 type B = (props: { className: string }) => any;
 
 type C = A extends B ? true : never; // never!
+
 // but then
 type D = (props: { className?: string }) => any;
 type E = D extends B ? true : never; // never!
 ```
 
-clearly type of `D` does support being passed a `className` prop but it doesn't extend `B`! I'll stop here as there could be more weird edge-cases, plus this is just one property `className`. So because of these interactions, I decided to just check if the props are valid using `ValidateProps`.
+clearly type `D` does support being passed a `className` prop but it doesn't extend `B`! I'll stop here as there are more interactions to take care of. And because of this, I felt it more useful to just have the checks for element type and prop type separately.
 
 </details>
