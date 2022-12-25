@@ -22,7 +22,7 @@ const Button: PolymorphicComponent<"button", Props> = ({
 };
 ```
 
-Let's focus on the `PolymorphicComponent` type, we give this type our default "button" and additional props we want to include, notice the props already has an `as` property, this is provided by default. If you're just looking to create simple polymorphic components, that's all you have to do!
+Using  the `PolymorphicComponent` type, we first give it our default type, "button", and additional props we want to include, notice the props already has an `as` property, this is provided by default. If you're just looking to create simple polymorphic components, that's all you have to do!
 
 We can then use this polymorphic component like so:
 

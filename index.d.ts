@@ -54,13 +54,14 @@ export type Restrict<
 // PROP TYPES
 // ----------------------------------------------
 
-// for some reason, removing PropsWithRef<T> from this type makes this a lot faster.
-// The PropsWithRef<T> type was just lifted to the top.
-export type _ComponentPropsWithRef<T extends ElementType> = T extends new (
-  props: infer P
-) => Component<any, any>
-  ? PropsWithoutRef<P> & RefAttributes<InstanceType<T>>
-  : ComponentProps<T>;
+// make typescript not check PropsWithRef<P> individually.
+// more detailed explanation here:
+// https://dev.to/nasheomirro/create-fast-type-safe-polymorphic-components-with-the-as-prop-ncn
+export type _ComponentPropsWithRef<T extends ElementType> = PropsWithRef<
+  T extends new (props: infer P) => Component<any, any>
+    ? PropsWithoutRef<P> & RefAttributes<InstanceType<T>>
+    : ComponentProps<T>
+>;
 
 export type PolymorphicPropsWithoutRef<
   T extends ElementType,
@@ -72,7 +73,7 @@ export type PolymorphicPropsWithRef<
   T extends ElementType,
   Props extends object = {},
   HasProps extends object = {}
-> = ValidateProps<T, Props, PropsWithRef<_ComponentPropsWithRef<T>>, HasProps>;
+> = ValidateProps<T, Props, _ComponentPropsWithRef<T>, HasProps>;
 
 // ----------------------------------------------
 // COMPONENT TYPES
