@@ -142,13 +142,6 @@ const Button: PolymorphicComponent<"button", {}, "button" | "a"> = ({
 
 ## FAQs
 
-<details>
-<summary> VSCode Autocomplete only suggests the default element</summary>
-
-wrap your string around and `{}` block, it will then show the full list of suggestions.
-
-</details>
-
 <details> 
 <summary> A note about adding constraints </summary>
 
@@ -158,5 +151,12 @@ using something like `ElementType<{ href: "a" }>` will not work on components wh
 type A = () => null;
 type B = A extends ElementType<{ required: string }> ? true : false; // true!
 ```
+
+</details>
+
+<details>
+<summary> VSCode Autocomplete only suggests the default element</summary>
+
+wrap your string around an `{}` block, it will then show the full list of suggestions.
 
 </details>
