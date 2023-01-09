@@ -4,7 +4,12 @@ import * as React from "react";
 // utility types
 // ----------------------------------------------
 
+type DistributiveOmit<T, K extends keyof any> = T extends any
+  ? Omit<T, K>
+  : never;
+
 type Merge<A, B> = Omit<A, keyof B> & B;
+type DistributiveMerge<A, B> = DistributiveOmit<A, B> & B;
 
 type AsProps<
   Default extends React.ElementType,
@@ -31,8 +36,8 @@ type AsProps<
        * overriding props but also because somehow it is needed to get the props correctly,
        * Merge does clone the first object so that might have something to do with it.
        */
-      | Merge<ComponentProps, PermanentProps & { as?: Component }>
-        | Merge<DefaultProps, PermanentProps & { as?: Default }>
+      | DistributiveMerge<ComponentProps, PermanentProps & { as?: Component }>
+        | DistributiveMerge<DefaultProps, PermanentProps & { as?: Default }>
     : never;
 
 /**
