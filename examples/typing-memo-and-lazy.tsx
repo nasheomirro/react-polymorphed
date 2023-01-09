@@ -1,10 +1,11 @@
 import React from "react";
 import {
   PolymorphicComponent,
-  PolyMemoExoticComponent,
+  PolyLazyComponent,
+  PolyMemoComponent,
   PolyRefFunction,
-  PolyForwardMemoExoticComponent,
-} from "index";
+  PolyForwardMemoComponent,
+} from "react-polymorphed";
 
 const polyRef = React.forwardRef as PolyRefFunction;
 
@@ -26,13 +27,14 @@ const RefButton = polyRef<"button", Props>(
   }
 );
 
-const MemoButton: PolyMemoExoticComponent<"button", Props> = React.memo(Button);
+const MemoButton: PolyMemoComponent<"button", Props> = React.memo(Button);
 
 // in another file:
-// const LazyButton: PolyLazyExoticComponent<"button", Props> = React.lazy(
-//   async () => import("./Button")
-// );
+const LazyButton: PolyLazyComponent<"button", Props> = React.lazy(
+  // @ts-expect-error
+  async () => import("./Button")
+);
 
 // use the correct type!
-const MemoRefButton: PolyForwardMemoExoticComponent<"button", Props> =
+const MemoRefButton: PolyForwardMemoComponent<"button", Props> =
   React.memo(RefButton);

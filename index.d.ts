@@ -9,7 +9,7 @@ type DistributiveOmit<T, K extends keyof any> = T extends any
   : never;
 
 type Merge<A, B> = Omit<A, keyof B> & B;
-type DistributiveMerge<A, B> = DistributiveOmit<A, B> & B;
+type DistributiveMerge<A, B> = DistributiveOmit<A, keyof B> & B;
 
 type AsProps<
   Default extends React.ElementType,
@@ -36,8 +36,8 @@ type AsProps<
        * overriding props but also because somehow it is needed to get the props correctly,
        * Merge does clone the first object so that might have something to do with it.
        */
-      | DistributiveMerge<ComponentProps, PermanentProps & { as?: Component }>
-        | DistributiveMerge<DefaultProps, PermanentProps & { as?: Default }>
+      | DistributiveMerge<DefaultProps, PermanentProps & { as?: Default }>
+        | DistributiveMerge<ComponentProps, PermanentProps & { as?: Component }>
     : never;
 
 /**
@@ -118,18 +118,16 @@ export type PolyLazyComponent<
   PolymorphicWithoutRef<Default, Props, OnlyAs>
 >;
 
-/**
- * instead of removing the call signature from `ForwardExoticComponent`, we extend it
- * to play well with `forwardRef()`, credit to Radix UI for that.
- */
-export interface PolyForwardComponent<
+export type PolyForwardComponent<
   Default extends OnlyAs,
   Props extends object = {},
   OnlyAs extends React.ElementType = React.ElementType
-> extends React.ForwardRefExoticComponent<
-      Merge<FastComponentPropsWithRef<Default>, Props & { as?: Default }>
-    >,
-    PolymorphicWithRef<Default, Props, OnlyAs> {}
+> = Merge<
+  React.ForwardRefExoticComponent<
+    Merge<FastComponentPropsWithRef<Default>, Props & { as?: Default }>
+  >,
+  PolymorphicWithRef<Default, Props, OnlyAs>
+>;
 
 export type PolyForwardMemoComponent<
   Default extends OnlyAs,
@@ -148,3 +146,16 @@ export type PolyForwardLazyComponent<
   React.LazyExoticComponent<React.ComponentType<any>>,
   PolymorphicWithRef<Default, Props, OnlyAs>
 >;
+
+// ----------------------------------------------
+// function types
+// - got the idea from chakra-ui, cast at your own risk.
+// ----------------------------------------------
+
+export type PolyRefFunction = <
+  Default extends OnlyAs,
+  Props extends object = {},
+  OnlyAs extends React.ElementType = React.ElementType
+>(
+  Component: React.ForwardRefRenderFunction<any, Props & { as?: OnlyAs }>
+) => PolyForwardComponent<Default, Props, OnlyAs>;

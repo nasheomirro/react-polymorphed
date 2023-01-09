@@ -1,7 +1,7 @@
 import React from "react";
-import { PolymorphicComponent, Restrict } from "index";
+import { PolymorphicComponent } from "react-polymorphed";
 
-const Button: PolymorphicComponent<"button", {}, Restrict<"button" | "a">> = ({
+const Button: PolymorphicComponent<"button", {}, "button" | "a"> = ({
   as: As = "button",
   ...props
 }) => {

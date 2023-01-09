@@ -1,13 +1,13 @@
 import React, { useRef } from "react";
-import { PolyRefFunction } from "index";
+import { PolyRefFunction } from "react-polymorphed";
 
-const polyRef = React.forwardRef as PolyRefFunction;
+const polyforwardRef = React.forwardRef as PolyRefFunction;
 
 type Props = {
   size?: "small" | "large";
 };
 
-const Button = polyRef<"button", Props>(
+const Button = polyforwardRef<"button", Props>(
   ({ as: As = "button", size, ...props }) => {
     return <As {...props} />;
   }
