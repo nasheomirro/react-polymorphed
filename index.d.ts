@@ -1,5 +1,7 @@
 import * as React from "react";
 
+export {};
+
 // ----------------------------------------------
 // utility types
 // ----------------------------------------------
@@ -11,7 +13,7 @@ type DistributiveOmit<T, K extends keyof any> = T extends any
 type Merge<A, B> = Omit<A, keyof B> & B;
 type DistributiveMerge<A, B> = DistributiveOmit<A, keyof B> & B;
 
-type AsProps<
+export type AsProps<
   Default extends React.ElementType,
   Component extends React.ElementType,
   PermanentProps extends object,
