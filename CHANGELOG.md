@@ -19,7 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - constraints lead to error on @types/react^17. [(#3)](https://github.com/nasheomirro/react-polymorphed/issues/3)
 
-## Changed
+### Changed
 
 - edited README.md to fix typos as well as providing new information regarding added types.
 
