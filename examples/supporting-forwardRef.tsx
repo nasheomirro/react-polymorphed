@@ -1,5 +1,5 @@
 import React, { useRef } from "react";
-import { PolyRefFunction } from "react-polymorphed";
+import { PolyRefFunction } from "index";
 
 const polyforwardRef = React.forwardRef as PolyRefFunction;
 

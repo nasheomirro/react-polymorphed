@@ -13,6 +13,11 @@ type DistributiveOmit<T, K extends keyof any> = T extends any
 type Merge<A, B> = Omit<A, keyof B> & B;
 type DistributiveMerge<A, B> = DistributiveOmit<A, keyof B> & B;
 
+export type OnlyAs<T extends React.ElementType> =
+  | T
+  // makes sure `ComponentProps<T>` are unknown
+  | (() => React.ReactElement<never>);
+
 export type AsProps<
   Default extends React.ElementType,
   Component extends React.ElementType,
@@ -52,6 +57,30 @@ export type FastComponentPropsWithRef<T extends React.ElementType> =
       ? React.PropsWithoutRef<P> & React.RefAttributes<InstanceType<T>>
       : React.ComponentProps<T>
   >;
+
+export type PolymorphicPropsWithoutRef<
+  Default extends React.ElementType,
+  Component extends React.ElementType,
+  PermanentProps extends object
+> = AsProps<
+  Default,
+  Component,
+  PermanentProps,
+  React.ComponentPropsWithoutRef<Default>,
+  React.ComponentPropsWithoutRef<Component>
+>;
+
+export type PolymorphicPropsWithRef<
+  Default extends React.ElementType,
+  Component extends React.ElementType,
+  PermanentProps extends object
+> = AsProps<
+  Default,
+  Component,
+  PermanentProps,
+  React.ComponentPropsWithoutRef<Default>,
+  React.ComponentPropsWithoutRef<Component>
+>;
 
 // ----------------------------------------------
 // call signatures

@@ -5,7 +5,7 @@ import {
   PolyMemoComponent,
   PolyRefFunction,
   PolyForwardMemoComponent,
-} from "react-polymorphed";
+} from "index";
 
 const polyRef = React.forwardRef as PolyRefFunction;
 

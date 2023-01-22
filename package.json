@@ -23,7 +23,7 @@
   "license": "MIT",
   "description": "Build fast type-safe Polymorphic components with ease.",
   "devDependencies": {
-    "@types/react": "^16.8",
+    "@types/react": "^17.0.53",
     "@typescript-eslint/eslint-plugin": "^5.47.0",
     "@typescript-eslint/parser": "^5.47.0",
     "eslint": "^8.30.0",
