@@ -8,8 +8,8 @@ type Props = {
 };
 
 const Button = polyforwardRef<"button", Props>(
-  ({ as: As = "button", size, ...props }) => {
-    return <As {...props} />;
+  ({ as: As = "button", size, ...props }, ref) => {
+    return <As ref={ref} {...props} />;
   }
 );
 

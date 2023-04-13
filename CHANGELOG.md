@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.1] - 2023-04-13
+
+### Added
+
+- Added .npmignore to exclude examples folder
+
+### Changed
+
+- edited README.md to fix `forwardRef` examples cause I forgot to add the ref attributes, also added a FAQ for [(#5)](https://github.com/nasheomirro/react-polymorphed/issues/5).
+- edited examples to have ref placed in.
+- edited comment on `index.d.ts` to make it up to date.
+
 ## [2.1.0] - 2023-01-22
 
 ### Added
@@ -56,6 +68,7 @@ These versions did not support changelog and is a bit messy to go through, since
 - Typings to support exotic components.
 - Restrict API to constraint `as` and if props of `as` are valid.
 
+[2.1.1]: https://github.com/nasheomirro/react-polymorphed/compare/v2.1.0...v2.1.1
 [2.1.0]: https://github.com/nasheomirro/react-polymorphed/compare/v2.0.1...v2.1.0
 [2.0.1]: https://github.com/nasheomirro/react-polymorphed/compare/v2.0.0...v2.0.1
 [2.0.0]: https://github.com/nasheomirro/react-polymorphed/compare/v1.0.0...v2.0.0

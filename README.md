@@ -46,8 +46,8 @@ type Props = {
 };
 
 const Button = polyRef<"button", Props>(
-  ({ as: As = "button", size, ...props }) => {
-    return <As {...props} />;
+  ({ as: As = "button", size, ...props }, ref) => {
+    return <As ref={ref} {...props} />;
   }
 );
 ```
@@ -112,8 +112,8 @@ type Props = {
 };
 
 const RefButton = forwardRef<"button", Props>(
-  ({ as: As = "button", size, ...props }) => {
-    return <As {...props} />;
+  ({ as: As = "button", size, ...props }, ref) => {
+    return <As ref={ref} {...props} />;
   }
 );
 
@@ -188,8 +188,22 @@ type B = A extends ElementType<{ required: string }> ? true : false; // true!
 </details>
 
 <details>
+<summary><strong>Using components with required props as the default or as a constraint</strong></summary>
+
+If you're having trouble with props being required on the `<As />` component, you can widen the type by casting it to `React.ElementType`. [see issue #5](https://github.com/nasheomirro/react-polymorphed/issues/5)
+
+```tsx
+polyRef<"button", {}, OnlyAs<"button" | "a" | typeof Link>>(({ as: As = "button", ...props }, ref) => {
+  const Elem = As as React.ElementType;
+  return <Elem ref={ref} />
+});
+```
+
+</details>
+
+<details>
 <summary><strong>VSCode Autocomplete only suggests the default element</strong></summary>
 
-wrap your string around an `{}` block, it will then show the full list of suggestions.
+it might help if you wrap your string around an `{}` block, it could show the full list of suggestions, doesn't fully work though.
 
 </details>

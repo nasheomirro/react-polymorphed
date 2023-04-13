@@ -30,6 +30,11 @@ export type AsProps<
    * extends check typescript won't do an additional inference phase,
    * but somehow we can trick typescript into doing so. Note that the check needs to be relating
    * to the generic for this to work.
+   *
+   * edit: typescript seems to work fine now without having to do this trick, this whole block
+   * could literally be replaced with just the first value of the union, but in a few cases in where
+   * theres more computation needed it somehow again doesn't infer events without this trick... it
+   * seems logical but idk what's happening heh
    */
   any extends Component
     ? /**
@@ -188,5 +193,8 @@ export type PolyRefFunction = <
   Props extends object = {},
   OnlyAs extends React.ElementType = React.ElementType
 >(
-  Component: React.ForwardRefRenderFunction<any, Props & { as?: OnlyAs }>
+  Component: React.ForwardRefRenderFunction<
+    any,
+    Props & { as?: OnlyAs }
+  >
 ) => PolyForwardComponent<Default, Props, OnlyAs>;
