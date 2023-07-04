@@ -17,7 +17,7 @@ const Example = () => {
   const buttonRef = useRef<HTMLButtonElement>(null);
   return (
     <>
-      <Button ref={buttonRef} />
+      <Button onClick={e => e} ref={buttonRef} />
       {/* @ts-expect-error */}
       <Button as="div" ref={buttonRef} />
     </>

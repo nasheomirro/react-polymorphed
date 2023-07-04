@@ -19,38 +19,10 @@ export type OnlyAs<T extends React.ElementType> =
   | (() => React.ReactElement<never>);
 
 export type AsProps<
-  Default extends React.ElementType,
   Component extends React.ElementType,
   PermanentProps extends object,
-  DefaultProps extends object,
   ComponentProps extends object
-> =
-  /**
-   * doing this makes sure typescript infers events. Without the
-   * extends check typescript won't do an additional inference phase,
-   * but somehow we can trick typescript into doing so. Note that the check needs to be relating
-   * to the generic for this to work.
-   *
-   * edit: typescript seems to work fine now without having to do this trick, this whole block
-   * could literally be replaced with just the first value of the union, but in a few cases in where
-   * theres more computation needed it somehow again doesn't infer events without this trick... it
-   * seems logical but idk what's happening heh
-   */
-  any extends Component
-    ? /**
-       * Merge<ComponentProps, OwnProps & { as?: Component }> looks sufficient,
-       * but typescript won't be able to infer events on components that haven't
-       * explicitly provided a value for the As generic or haven't provided an `as` prop.
-       * We could do the same trick again like the above but discriminating unions should be
-       * enough as we don't have to compute the value for the default.
-       *
-       * Also note that Merging here is needed not just for the purpose of
-       * overriding props but also because somehow it is needed to get the props correctly,
-       * Merge does clone the first object so that might have something to do with it.
-       */
-      | DistributiveMerge<DefaultProps, PermanentProps & { as?: Default }>
-        | DistributiveMerge<ComponentProps, PermanentProps & { as?: Component }>
-    : never;
+> = DistributiveMerge<ComponentProps, PermanentProps & { as?: Component }>;
 
 /**
  * make typescript not check PropsWithRef<P> individually.
@@ -64,28 +36,18 @@ export type FastComponentPropsWithRef<T extends React.ElementType> =
   >;
 
 export type PolymorphicPropsWithoutRef<
-  Default extends React.ElementType,
   Component extends React.ElementType,
   PermanentProps extends object
 > = AsProps<
-  Default,
   Component,
   PermanentProps,
-  React.ComponentPropsWithoutRef<Default>,
   React.ComponentPropsWithoutRef<Component>
 >;
 
 export type PolymorphicPropsWithRef<
-  Default extends React.ElementType,
   Component extends React.ElementType,
   PermanentProps extends object
-> = AsProps<
-  Default,
-  Component,
-  PermanentProps,
-  React.ComponentPropsWithoutRef<Default>,
-  React.ComponentPropsWithoutRef<Component>
->;
+> = AsProps<Component, PermanentProps, FastComponentPropsWithRef<Component>>;
 
 // ----------------------------------------------
 // call signatures
@@ -96,13 +58,7 @@ export type PolymorphicWithoutRef<
   Props extends object = {},
   OnlyAs extends React.ElementType = React.ElementType
 > = <T extends OnlyAs = Default>(
-  props: AsProps<
-    Default,
-    T,
-    Props,
-    React.ComponentPropsWithoutRef<Default>,
-    React.ComponentPropsWithoutRef<T>
-  >
+  props: AsProps<T, Props, React.ComponentPropsWithoutRef<T>>
 ) => React.ReactElement | null;
 
 export type PolymorphicWithRef<
@@ -110,13 +66,7 @@ export type PolymorphicWithRef<
   Props extends object = {},
   OnlyAs extends React.ElementType = React.ElementType
 > = <T extends OnlyAs = Default>(
-  props: AsProps<
-    Default,
-    T,
-    Props,
-    FastComponentPropsWithRef<Default>,
-    FastComponentPropsWithRef<T>
-  >
+  props: AsProps<T, Props, FastComponentPropsWithRef<T>>
 ) => React.ReactElement | null;
 
 // ----------------------------------------------
@@ -193,8 +143,5 @@ export type PolyRefFunction = <
   Props extends object = {},
   OnlyAs extends React.ElementType = React.ElementType
 >(
-  Component: React.ForwardRefRenderFunction<
-    any,
-    Props & { as?: OnlyAs }
-  >
+  Component: React.ForwardRefRenderFunction<any, Props & { as?: OnlyAs }>
 ) => PolyForwardComponent<Default, Props, OnlyAs>;
