@@ -5,9 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.2] - 2023-10-31
+
+### Fixed
+
+- fixed CHANGELOG formatting and README example
+- added warning to README to not use constraints
+
 ## [2.2.1] - 2023-07-12
 
-## Fixed
+### Fixed
 
 - cleaned up dependencies, fixed liscense.
 
@@ -18,7 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - removed the union trick from `AsProps`, because of this we also remove un-needed parameters.
 - removed `Default` parameter from `PolymorphicPropsWithRef` and `PolymorphicPropsWithoutRef`.
 
-## Fixed
+### Fixed
 
 - fixed `PolymorphicPropsWithRef` not using `FastComponentPropsWithRef`.
 - fixed [(#6)](https://github.com/nasheomirro/react-polymorphed/issues/6) by removing the union trick from `AsProps`, hopefully this won't stir trouble in the future and that typescript will keep inferring events correctly.
@@ -86,7 +93,8 @@ These versions did not support changelog and is a bit messy to go through, since
 - Typings to support exotic components.
 - Restrict API to constraint `as` and if props of `as` are valid.
 
-[2.2.0]: https://github.com/nasheomirro/react-polymorphed/compare/v2.2.0...v2.2.1
+[2.2.2]: https://github.com/nasheomirro/react-polymorphed/compare/v2.2.1...v2.2.2
+[2.2.1]: https://github.com/nasheomirro/react-polymorphed/compare/v2.2.0...v2.2.1
 [2.2.0]: https://github.com/nasheomirro/react-polymorphed/compare/v2.1.1...v2.2.0
 [2.1.1]: https://github.com/nasheomirro/react-polymorphed/compare/v2.1.0...v2.1.1
 [2.1.0]: https://github.com/nasheomirro/react-polymorphed/compare/v2.0.1...v2.1.0

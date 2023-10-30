@@ -101,17 +101,21 @@ const LazyButton: PolyLazyComponent<"button", Props> = React.lazy(
 );
 ```
 
+## `memo()` and `lazy()` with `polyRef()`
+
 Note that if the polymorphic component forwards refs, you need to instead use either the `PolyForwardMemoComponent` or `PolyForwardLazyComponent` to correctly preserve the ref property.
 
 ```tsx
 import React from "react";
-import { forwardRef, PolyForwardMemoComponent } from "react-polymorphed";
+import { PolyRefFunction, PolyForwardMemoComponent } from "react-polymorphed";
+
+const polyRef = React.forwardRef as PolyRefFunction;
 
 type Props = {
   size?: "small" | "large";
 };
 
-const RefButton = forwardRef<"button", Props>(
+const RefButton = polyRef<"button", Props>(
   ({ as: As = "button", size, ...props }, ref) => {
     return <As ref={ref} {...props} />;
   }
@@ -141,8 +145,26 @@ const Button: PolymorphicComponent<"button", {}, OnlyAs<"button" | "a">> = ({
 <Button as="a" />;
 <Button as="div" />; // error!
 ```
+⚠️ Hold up! It has occured to me that constraints may not be a good feature to use and could even do more harm than good so before you use constraints it is important that you read the FAQ below on why you might not want them.
 
 ## FAQs
+
+<details> 
+<summary><strong>You might not want constraints</strong></summary>
+
+Using something like `ElementType<{ required: string }>` will not work on components which do not have any props:
+
+```tsx
+type A = () => null;
+type B = ElementType<{ required: string }>;
+type DoesExtend = A extends B ? true : false; // true!
+```
+
+There's really no solution to fix this at the moment since this is a problem with typescript itself, and to no fault from typescript because the type of `A` CAN technically be called with the props of `B` because `A` won't use those props anyway, and since `ReturnType<A>` extends `ReturnType<B>` there is no reason for `A` to not extend `B`.
+
+So unless you really need constraints and you and your team fully expect this behavior and other weird behaviors that comes from it, maybe you shouldn't use this at all. however, constraints that are purely just elements (e.g `"button" | "a"`) will probably work just fine.
+
+</details>
 
 <details> 
 <summary><strong>Why do we need to wrap our constraints with <code>OnlyAs<T></code></strong></summary>
@@ -175,18 +197,6 @@ type C = ComponentPropsWithoutRef<
 ```
 </details>
 
-<details> 
-<summary><strong>A note about adding constraints</strong></summary>
-
-using something like `ElementType<{ href: "a" }>` will not work on components which do not have explicit props:
-
-```tsx
-type A = () => null;
-type B = A extends ElementType<{ required: string }> ? true : false; // true!
-```
-
-</details>
-
 <details>
 <summary><strong>Using components with required props as the default or as a constraint</strong></summary>
 
@@ -204,6 +214,6 @@ polyRef<"button", {}, OnlyAs<"button" | "a" | typeof Link>>(({ as: As = "button"
 <details>
 <summary><strong>VSCode Autocomplete only suggests the default element</strong></summary>
 
-it might help if you wrap your string around an `{}` block, it could show the full list of suggestions, doesn't fully work though.
+It might help if you wrap your string around an `{}` block, it could show the full list of suggestions, doesn't fully work though.
 
 </details>
