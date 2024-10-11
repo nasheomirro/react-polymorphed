@@ -1,7 +1,5 @@
 import * as React from "react";
 
-export {};
-
 // ----------------------------------------------
 // utility types
 // ----------------------------------------------
@@ -74,17 +72,11 @@ export type PolymorphicWithRef<
 // - note that Merge here is removing the default call signature.
 // ----------------------------------------------
 
-export interface PolymorphicComponent<
+export type PolymorphicComponent<
   Default extends OnlyAs,
   Props extends object = {},
   OnlyAs extends React.ElementType = React.ElementType
-> extends PolymorphicWithoutRef<Default, Props, OnlyAs> {
-  displayName?: string;
-  propTypes?: React.WeakValidationMap<any>;
-  contextTypes?: React.ValidationMap<any>;
-  defaultProps?: Partial<any>;
-  id?: string;
-}
+>  = PolymorphicWithoutRef<Default, Props, OnlyAs> & React.ComponentType<Props>;
 
 export type PolyMemoComponent<
   Default extends OnlyAs,
